@@ -36,7 +36,8 @@ function FramesController(canvas) {
   
   //こいつにframeごとのarrでその中に時系列を入れる。
   this.historyFrames=[];
-  this.currentHistoryId=[];//みたいな感じで現在のすべてのframeのhistoryのtips作ったほうがいい・・・？まああんまり変数ふやしてもアレだし。
+  //みたいな感じで現在のすべてのframeのhistoryのtips作ったほうがいい・・・？まああんまり変数ふやしてもアレだし。
+  this.currentHistoryId=[];
   
   this.currentFrameId = 0;
   this.canvasModel = new CanvasModel(canvas);
@@ -149,16 +150,32 @@ FramesController.prototype.getCurrentFrame = function() {
 
 FramesController.prototype.addHistory = function() {
   //現在のフレームの状態ををhistoryに追加
-  
+  if(typeof this.historyFrames[this.currentFrameId] === "undefined"){
+    this.historyFrames[this.currentFrameId]=[];
+  }
+  const historyTips=(this.historyFrames[this.currentFrameId]).push(this.canvasModel.getImageData);
+  this.currentHistoryId[this.currentFrameId]=historyTips;
 };
 
 FramesController.prototype.undo = function(num) {
   //現在のフレームの状態ををnumだけ戻す。
+  const now = this.currentHistoryId[this.currentFrameId];
+  if(now-num < 0){
+    console.log("それ以上戻せません！");
+  }else{
+    this.currentHistoryId[this.currentFrameId]=now-num;
+  }
   
 };
 
-FramesController.prototype.undo = function(num) {
+FramesController.prototype.redo = function(num) {
   //現在のフレームの状態ををnumだけすすめる。
+  const now = this.currentHistoryId[this.currentFrameId];
+  if(this.historyFrames[this.currentFrameId][now+num]){
+    console.log("それ以上進めません！");
+  }else{
+    this.currentHistoryId[this.currentFrameId]=now+num;
+  }
   
 };
 export default FramesController;
