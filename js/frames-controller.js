@@ -2,11 +2,42 @@ import Frame from "./frame";
 import eventPublisher from "./publisher";
 import CanvasModel from "./canvas-model";
 
+function test(framescontroller){
+   
+    let currentFrame = framescontroller.getCurrentFrame();
+    let frames=[];
+    //framesは各frameのarrayを入れる。e.g. frame[1]には2つめのframeidのidlingごとgetImageDataしたarray
+    let currentframeID=framescontroller.currentFrameId;
+    for(let i=currentframeID;0<=i;i--){
+        console.log("tess");
+        frames[i]=[];
+        frames[i].push(framescontroller.canvasModel.getImageData());
+    }
+
+    eventPublisher.subscribe("drawState",(state)=>{
+       if(state=="idling"){
+            frames[framescontroller.currentFrameId].push(framescontroller.canvasModel.getImageData());
+        }
+    });
+    eventPublisher.subscribe("currentFrameId", (frameid)=>{
+        if(typeof frames[frameid] ==="undefined"){
+            frames[frameid]=[];
+        }
+    });
+}
+
+
+//このブランチではaddhistoryclassを作って発火された時にhistory追加するというブランチ
 // frame の追加・削除、currentFrameの切り替えをModel上で行う
 function FramesController(canvas) {
   let updateImageDataToNextData;
   let updateCurrentFrameImageData;
   this.frames = [];
+  
+  //こいつにframeごとのarrでその中に時系列を入れる。
+  this.historyFrames=[];
+  this.currentHistoryId=[];//みたいな感じで現在のすべてのframeのhistoryのtips作ったほうがいい・・・？まああんまり変数ふやしてもアレだし。
+  
   this.currentFrameId = 0;
   this.canvasModel = new CanvasModel(canvas);
   updateImageDataToNextData = (frameId) => {
@@ -21,8 +52,21 @@ function FramesController(canvas) {
       currentFrame.imageData = this.canvasModel.getImageData();
     }
   };
+  
+  // aa = (state) => {
+  //   if (state == "idling") {
+  //     console.log("aa");
+  //     // updateCurrentFrameImageData();
+  //     // //this.currentFrameId = frameId;
+  //     // this.canvasModel.setImageData(this.getCurrentFrame().imageData);
+      
+  //     this.historyframes[this.currentFrameId].push(this.canvasModel.getImageData());
+      
+  //   }
+  // }
 
   eventPublisher.subscribe("currentFrameId", updateImageDataToNextData);
+  // eventPublisher.subscribe("drawState", autoSaveHistory);//updateImageDataToNextData);
   eventPublisher.subscribe("openMenu", updateCurrentFrameImageData);
 }
 
@@ -101,5 +145,20 @@ FramesController.prototype.getFrameById = function(frameId) {
 
 FramesController.prototype.getCurrentFrame = function() {
   return this.frames[this.currentFrameId];
+};
+
+FramesController.prototype.addHistory = function() {
+  //現在のフレームの状態ををhistoryに追加
+  
+};
+
+FramesController.prototype.undo = function(num) {
+  //現在のフレームの状態ををnumだけ戻す。
+  
+};
+
+FramesController.prototype.undo = function(num) {
+  //現在のフレームの状態ををnumだけすすめる。
+  
 };
 export default FramesController;
